@@ -1,6 +1,11 @@
 const columns = document.querySelectorAll('.column');
 let draggedItem = null
 
+function autoFocusInputTitle() {
+    const title = document.getElementById('todo-name-input')
+    title.focus()
+}
+
 // Reset todo task editor
 function resetTodoTask() {
     const title = document.getElementById('todo-name-input')
