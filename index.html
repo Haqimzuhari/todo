@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="./assets/github-mark-white.png">
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
     <title>Todo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,47 +22,90 @@
         }
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="w-full max-w-screen-xl mx-auto p-4">
-        <div class="flex space-x-6 items-center">
-            <h1 class="text-xl font-semibold">Todo</h1>
-            <button type="button" class="hidden md:inline-block rounded bg-indigo-500 hover:bg-indigo-600 px-5 py-2 text-sm font-medium text-white" x-data="{id:'add_todo_modal'}" x-on:click="$dispatch('modal-overlay',{id})">
-                  <p>Add</p>
-            </button>
-        </div>
-        <div class="block md:hidden "><p class="text-sm">Your screen is too small. Not suitable for mobile screen</p></div>
-        <div class="fixed inset-0 z-10 hidden md:flex md:flex-col md:items-center justify-end overflow-y-auto bg-zinc-600/60 sm:justify-start" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'add_todo_modal') modal=true">
-            <div class="w-full px-2 my-20 transition-all transform sm:max-w-md" x-show="modal" x-on:click.away="modal=false">
-                <div class="bg-white rounded-2xl shadow-xl p-8 space-y-4">
-                    <p class="text-xl font-semibold">Add New Todo</p>
-                    <form id="actionForm" class="flex flex-col space-y-4">
-                        <div class="col-span-6 sm:col-span-3">
-                            <label for="actionName" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" id="actionName" class="w-full rounded border p-2 text-sm shadow-sm" required/>
-                        </div>
-                        <div class="col-span-6 sm:col-span-3">
-                            <label for="actionDescription" class="block text-sm font-medium text-gray-700">Description</label>
-                            <textarea id="actionDescription" class="w-full rounded border p-2 text-sm shadow-sm" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" class="inline-block rounded font-semibold bg-indigo-500 hover:bg-indigo-600 px-5 py-2 text-sm font-medium text-white">Add</button>
-                    </form>
+<body class="text-neutral-200 bg-neutral-900">
+    <!-- Mobile screen container warning -->
+    <div id="mobile-screen-warning-container" class="md:hidden w-full h-32 flex flex-col items-center justify-center text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 stroke-2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.412 15.655 9.75 21.75l3.745-4.012M9.257 13.5H3.75l2.659-2.849m2.048-2.194L14.25 2.25 12 10.5h8.25l-4.707 5.043M8.457 8.457 3 3m5.457 5.457 7.086 7.086m0 0L21 21" />
+        </svg>          
+        <p class="font-medium">Your screen is too small</br>Not suitable for mobile screen</p>
+    </div>
+
+    <!-- Main App -->
+    <main id="app" class="hidden md:flex">
+        <!-- To do container -->
+        <div class="w-full max-w-screen-xl mx-auto px-4 py-10 space-y-6">
+            <!-- To do header -->
+            <div>
+                <a href="./" class="text-lg font-black text-neutral-600 hover:text-neutral-100 transition">Todo</a>
+            </div>
+
+            <!-- To do columns -->
+            <div class="grid grid-cols-3 gap-6">
+                <!-- To do -->
+                <div id="todo" class="column flex flex-col space-y-4">
+                    <!-- Todo header -->
+                    <div class="h-10 flex justify-between items-center bg-neutral-800/40 px-4 rounded-lg">
+                        <p class="font-extrabold">Todo</p>
+                        <button type="button" class="appearance-none outline-none rounded-lg hover:text-indigo-400 hover:bg-neutral-700 p-1 transition" title="Add new to do" x-data="{id:'todo-editor-modal'}" x-on:click="$dispatch('open-modal-overlay',{id})">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 stroke-2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Tasks -->
+                </div>
+
+                <!-- Ongoing -->
+                <div id="ongoing" class="column flex flex-col space-y-4">
+                    <div class="h-10 flex justify-between items-center bg-yellow-800/20 px-4 rounded-lg">
+                        <p class="font-bold">Ongoing</p>
+                    </div>
+                </div>
+
+                <!-- Done -->
+                <div id="done" class="column flex flex-col space-y-4">
+                    <div class="h-10 flex justify-between items-center bg-green-800/20 px-4 rounded-lg">
+                        <p class="font-bold">Done</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="hidden md:columns md:grid md:grid-cols-3 md:gap-4 mt-8">
-            <div class="column p-4 space-y-2 rounded-lg bg-slate-100 shadow-sm" id="todo">
-                <p class="font-semibold">To do</p>
+    </main>
+
+    <!-- Add Todo modal overlay -->
+    <div id="modal-overlay" class="hidden md:fixed md:inset-0 md:overflow-y-auto md:z-10 bg-neutral-800/40 md:backdrop-blur-sm md:flex md:flex-col md:px-2 md:py-8" x-data="{modal:false}" x-show="modal" x-on:open-modal-overlay.window="if ($event.detail.id == 'todo-editor-modal') modal=true" x-on:close-modal-overlay.window="if ($event.detail.id == 'todo-editor-modal') modal=false" x-transition:enter="transition ease-in" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-out" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-on:keyup.escape.window="closeTodoModal()" x-cloak>
+        <!-- Modal content -->
+        <div id="modal-content" class="w-full md:max-w-md mx-auto bg-neutral-900 rounded-2xl shadow-xl p-8 flex flex-col space-y-4" x-show="modal" x-transition:enter="transition ease-in" x-transition:enter-start="opacity-0 translate-y-3" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-out" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-3">
+            <!-- Modal header -->
+            <div class="flex justify-between items-center">
+                <p class="text-lg font-semibold">Add Todo</p>
+                <button type="button" x-on:click="closeTodoModal()" class="text-neutral-600 hover:text-neutral-100 transition outline-none appearance-none ring-neutral-700 rounded-lg focus:ring-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 stroke-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>                      
+                </button>
             </div>
-            <div class="column p-4 space-y-2 rounded-lg bg-yellow-100 shadow-sm" id="ongoing">
-                <p class="font-semibold">Ongoing</p>
-            </div>
-            <div class="column p-4 space-y-2 rounded-lg bg-green-100 shadow-sm" id="done">
-                <p class="font-semibold">Done</p>
+            <!-- Editor todo container  -->
+            <div id="editor-todo" class="flex flex-col space-y-4">
+                <!-- Inputs -->
+                <div class="flex flex-col items-start space-y-2">
+                    <label for="todo-name-input" class="text-sm font-medium">Name</label>
+                    <input type="text" id="todo-name-input" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4"/>
+                </div>
+                <div class="flex flex-col items-start">
+                    <div id="todo-description-input" contenteditable="true" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4 min-h-40"></div>
+                </div>
+                <!-- Button -->
+                <div class="flex items-center space-x-2">
+                    <button id="todo-editor-save-button" x-on:click="saveTodoTask()" type="button" class="appearance-none outline-none w-full text-sm font-semibold bg-indigo-500 text-neutral-100 transition text-center rounded-lg py-2 px-3 ring-indigo-400 hover:ring-4 focus:ring-4 active:ring-4">Add</button>
+                    <button id="todo-editor-save-button" x-on:click="resetTodoTask(), closeTodoModal()" type="button" class="appearance-none outline-none w-full text-sm font-semibold bg-neutral-800 text-neutral-100 transition text-center rounded-lg py-2 px-3 ring-neutral-700 hover:ring-4 focus:ring-4 active:ring-4">Cancel</button>
+                </div>
             </div>
         </div>
     </div>
-    <script src="scripts.js"></script>
+    
+    <script src="./scripts.js"></script>
 </body>
 </html>
