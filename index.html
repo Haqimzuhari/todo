@@ -48,7 +48,7 @@
                     <!-- Todo header -->
                     <div class="h-10 flex justify-between items-center bg-neutral-800/40 px-4 rounded-lg">
                         <p class="font-extrabold">Todo</p>
-                        <button type="button" class="appearance-none outline-none rounded-lg hover:text-indigo-400 hover:bg-neutral-700 p-1 transition" title="Add new to do" x-data="{id:'todo-editor-modal'}" x-on:click="$dispatch('open-modal-overlay',{id})">
+                        <button type="button" class="appearance-none outline-none rounded-lg hover:text-indigo-400 hover:bg-neutral-700 p-1 transition" title="Add new todo" x-data="{id:'todo-editor-modal'}" x-on:click="$dispatch('open-modal-overlay',{id}); $dispatch('autofocus-name', {id})">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 stroke-2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
@@ -92,7 +92,7 @@
                 <!-- Inputs -->
                 <div class="flex flex-col items-start space-y-2">
                     <label for="todo-name-input" class="text-sm font-medium">Name</label>
-                    <input type="text" id="todo-name-input" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4"/>
+                    <input x-show="modal" x-on:autofocus-name.window="if ($event.detail.id == 'todo-editor-modal') $nextTick(() => { $el.focus() })" type="text" id="todo-name-input" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4"/>
                 </div>
                 <div class="flex flex-col items-start">
                     <div id="todo-description-input" contenteditable="true" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4 min-h-40"></div>
