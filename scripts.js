@@ -30,17 +30,10 @@ function saveTodoTask() {
     
     action.setAttribute('draggable', true);
     action.setAttribute('x-data', true);
-    action.className = "task bg-neutral-800/40 p-4 rounded-lg border border-neutral-700/40 flex flex-col space-y-2 cursor-grabbing"
+    action.className = "task bg-neutral-800/60 p-4 rounded-lg border border-neutral-700/60 flex flex-col space-y-2 cursor-grabbing hover:bg-neutral-800 transition"
     action.innerHTML = `
-        <div class="flex justify-between items-center">
-            <p class="font-medium">${title.value}</p>
-            <button type="button">x</button>
-        </div>
-        <p class="text-sm text-neutral-200/60">${description.innerHTML}</p>
-    `
-    action.innerHTML = `
-        <div class="flex justify-between items-center">
-            <p class="font-bold">${title.value}</p>
+        <div class="flex justify-between items-start">
+            <p class="font-bold text-white">${title.value}</p>
             <button type="button" x-on:click="deleteTodoTask($el)" class="text-neutral-600 hover:text-neutral-100 transition outline-none appearance-none ring-neutral-700 rounded-lg focus:ring-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 stroke-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -50,9 +43,9 @@ function saveTodoTask() {
         <p class="text-neutral-300 break-words whitespace-pre-wrap">${description.innerHTML}</p>
         <div class="comment-container pt-4">
             <div class="comment-form flex">
-                <input type="text" x-on:keyup.enter="addComment($el)"  class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-2 py-1 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4 text-sm" placeholder="Comment"/>
+                <input type="text" x-on:keyup.enter="addComment($el)" placeholder="Comment" class="appearance-none outline-none w-full rounded-lg bg-neutral-900 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4 text-sm border border-neutral-700/60"/>
             </div>
-            <div class="comment-section divide-y divide-neutral-700/50 pt-2"></div>
+            <div class="comment-section divide-y divide-neutral-700/40 pt-2"></div>
         </div>
     `
     todoColumn.appendChild(action)
@@ -96,8 +89,8 @@ function addComment(element) {
         const comment = document.createElement('div')
         comment.className = 'comment py-3 flex justify-between items-start'
         comment.innerHTML = `
-            <p class="text-sm text-neutral-300/90 break-words whitespace-pre-wrap">${newComment}</p>
-            <button type="button" x-on:click="deleteComment($el)" class="text-neutral-600 hover:text-neutral-100 transition outline-none appearance-none ring-neutral-700 rounded-lg focus:ring-2 mt-1">
+            <p class="text-sm text-neutral-300/80 break-words whitespace-pre-wrap">${newComment}</p>
+            <button type="button" x-on:click="deleteComment($el)" class="text-neutral-600 hover:text-neutral-100 transition outline-none appearance-none ring-neutral-700 rounded-lg focus:ring-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 stroke-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
