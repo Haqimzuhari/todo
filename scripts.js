@@ -31,7 +31,7 @@ function saveTodoTask() {
     action.setAttribute('x-data', true);
     action.className = "task bg-neutral-800/60 p-4 rounded-lg border border-neutral-700/60 flex flex-col space-y-2 hover:bg-neutral-800 transition"
     action.innerHTML = `
-        <div class="flex justify-between items-start">
+        <div class="flex justify-between items-start space-x-4">
             <div class="flex space-x-4 items-start">
                 <div class="cursor-grabbing" draggable="true">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 stroke-2">
