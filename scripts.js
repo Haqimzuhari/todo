@@ -28,12 +28,18 @@ function saveTodoTask() {
     const description = document.getElementById('todo-description-input')
     const action = document.createElement('div')
     
-    action.setAttribute('draggable', true);
     action.setAttribute('x-data', true);
-    action.className = "task bg-neutral-800/60 p-4 rounded-lg border border-neutral-700/60 flex flex-col space-y-2 cursor-grabbing hover:bg-neutral-800 transition"
+    action.className = "task bg-neutral-800/60 p-4 rounded-lg border border-neutral-700/60 flex flex-col space-y-2 hover:bg-neutral-800 transition"
     action.innerHTML = `
         <div class="flex justify-between items-start">
-            <p class="font-bold text-white">${title.value}</p>
+            <div class="flex space-x-4 items-center">
+                <div class="cursor-grabbing" draggable="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 stroke-2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </div>
+                <p class="font-bold text-white">${title.value}</p>
+            </div>
             <button type="button" x-on:click="deleteTodoTask($el)" class="text-neutral-600 hover:text-neutral-100 transition outline-none appearance-none ring-neutral-700 rounded-lg focus:ring-2">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 stroke-2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
