@@ -1,107 +1,166 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
-    <title>Todo</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>todo &mdash; Manage your daily task</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {theme: {fontFamily: {'sans': ['Inter']}}}
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['"Space Grotesk"'],
+                    },
+                    colors: {
+                        'neutral-750':  '#2b2b2b'
+                    },
+                    borderRadius: {
+                        'semimedium': '0.295rem'
+                    }
+                }
+            }
+        }
     </script>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="text-neutral-200 bg-neutral-900">
-    <!-- Mobile screen container warning -->
-    <div id="mobile-screen-warning-container" class="md:hidden w-full h-32 flex flex-col items-center justify-center text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 stroke-2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.412 15.655 9.75 21.75l3.745-4.012M9.257 13.5H3.75l2.659-2.849m2.048-2.194L14.25 2.25 12 10.5h8.25l-4.707 5.043M8.457 8.457 3 3m5.457 5.457 7.086 7.086m0 0L21 21" />
-        </svg>          
-        <p class="font-medium">Your screen is too small</br>Not suitable for mobile screen</p>
+<body class="bg-neutral-800 text-neutral-50">
+    <div id="app" class="px-4">
+        <nav class="fixed top-0 right-0 left-0 h-16 bg-neutral-800 border-b border-neutral-700 px-4">
+            <div class="w-full h-full max-w-screen-2xl mx-auto flex items-center justify-between">
+                <div>
+                    <a href="" class="text-base md:text-xl font-bold">todo <span class="font-light text-base hidden md:inline-block"> &mdash; manage your daily task</span></a>
+                </div>
+                <div>
+                    <button type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm" x-data="{id:'modal-add-group'}" x-on:click="$dispatch('modal-overlay',{id})">Create</button>
+                    <div class="fixed inset-0 z-10 p-10 bg-black/50" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'modal-add-group') modal=true">
+                        <div class="w-full mx-auto md:max-w-screen-md bg-neutral-800 p-10 rounded-xl" x-show="modal" x-on:click.away="modal=false">
+                            <form @submit.prevent="addGroup" class="flex flex-col space-y-3">
+                                <input v-model="newGroupName" type="text" placeholder="Group name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                                <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Create Group</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>    
+        <main class="w-full max-w-screen-2xl mx-auto pt-20 pb-10">
+            <div v-if="groups.length === 0" class="flex flex-col justify-center items-center space-y-12 py-10">
+                <img src="assets/no-data.svg" alt="No Data Available" class="mx-auto w-56 md:w-80">
+                <p class="text-neutral-500 text-sm md:text-base">No data available. Start to create one</p>
+            </div>
+            <div v-else class="space-y-8">
+                <div v-for="group in groups" :key="group.id" class="w-full p-4 rounded-xl space-y-4 border border-neutral-700">
+                    <div class="flex items-center justify-between">
+                        <p class="text-lg font-bold underline decoration-2 underline-offset-4">{{ group.name }}</p>
+                        <div>
+                            <button type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm" x-data="{id:'modal-add-item'}" x-on:click="$dispatch('modal-overlay',{id})">Add Item</button>
+                            <div class="fixed inset-0 z-10 p-10 bg-black/50" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'modal-add-item') modal=true">
+                                <div class="w-full mx-auto md:max-w-screen-md bg-neutral-800 p-10 rounded-xl" x-show="modal" x-on:click.away="modal=false">
+                                    <form @submit.prevent="addItem(group.id)" class="flex flex-col space-y-3">
+                                        <input v-model="newItemName[group.id]" type="text" placeholder="Item name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                                        <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add item</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="items.length === 0">
+                        <p class="text-neutral-500 text-sm md:text-base">No item. Create one</p>
+                    </div>
+                    <div v-else class="space-y-6">
+                        <div v-for="item in items.filter(i => i.groupId === group.id)" :key="item.id" class="space-y-2">
+                            <div class="space-y-1">
+                                <p class="text-base font-semibold">{{ item.name }}</p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-sm font-light text-neutral-500">{{ formatDate(item.created_at) }}</p>
+                                    <div>
+                                        <button type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm" x-data="{id:'modal-add-task-{{ item.name }}'}" x-on:click="$dispatch('modal-overlay',{id})">Add Task</button>
+                                        <div class="fixed inset-0 z-10 p-10 bg-black/50" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'modal-add-task-{{ item.name }}') modal=true">
+                                            <div class="w-full mx-auto md:max-w-screen-md bg-neutral-800 p-10 rounded-xl" x-show="modal" x-on:click.away="modal=false">
+                                                <form @submit.prevent="addTask(item.id)" class="flex flex-col space-y-3">
+                                                    <input v-model="newTaskName[item.id]" type="text" placeholder="Task name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                                                    <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add task</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <button v-on:click="deleteItem(item.id, group.id)" type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Delete Item</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="tasks.length === 0">
+                                <p class="text-neutral-500 text-sm md:text-base">Task is empty</p>
+                            </div>
+                            <div v-else class="space-y-2">
+                                <div v-for="task in tasks.filter(i => i.itemId === item.id)" :key="task.id" class="p-4 space-y-4 bg-neutral-750 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div class="bg-green-800 rounded-full px-1 text-sm">{{ task.status }}</div>
+                                        <div class="flex-none flex space-x-2 items-center">
+                                            <form @submit.prevent="addComment(task.id)" class="inline-flex">
+                                                <input v-model="newCommentText[task.id]" type="text" placeholder="Comment" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                                                <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add comment</button>
+                                            </form>
+                                            <button type="button" class="bg-neutral-800 p-1 rounded-md">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                    <path fill-rule="evenodd" d="M10 3c-4.31 0-8 3.033-8 7 0 2.024.978 3.825 2.499 5.085a3.478 3.478 0 0 1-.522 1.756.75.75 0 0 0 .584 1.143 5.976 5.976 0 0 0 3.936-1.108c.487.082.99.124 1.503.124 4.31 0 8-3.033 8-7s-3.69-7-8-7Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm-2-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm5 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <button type="button" class="bg-neutral-800 p-1 rounded-md">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <button type="button" class="bg-neutral-800 p-1 rounded-md">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                    <path fill-rule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <button v-on:click="deleteTask(task.id)" type="button" class="bg-neutral-800 p-1 rounded-md">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                    <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium" :class="{'line-through': task.status === 'done'}">{{ task.name }}</p>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div v-for="comment in comments.filter(c => c.taskId === task.id)" :key="comment.id" class="flex flex-col md:flex-row items-start md:items-center md:space-x-2">
+                                            <p class="text-sm font-extralight">{{ comment.text }}</p>
+                                            <div class="flex items-center space-x-2">
+                                                <p class="text-sm font-extralight text-neutral-500">{{ formatDate(comment.created_at) }}</p>
+                                                <button v-on:click="deleteComment(comment.id)" type="button" class="bg-neutral-800 p-1 rounded-md">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                                                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                                                    </svg>                                              
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    <!-- Main App -->
-    <main id="app" class="hidden md:flex">
-        <!-- To do container -->
-        <div class="w-full max-w-screen-xl mx-auto px-4 py-10 space-y-6">
-            <!-- To do header -->
-            <div>
-                <a href="./" class="text-lg font-black text-neutral-200 hover:text-neutral-50 transition">Todo</a>
-            </div>
-
-            <!-- To do columns -->
-            <div class="grid grid-cols-3 gap-6">
-                <!-- To do -->
-                <div id="todo" class="column flex flex-col space-y-4">
-                    <!-- Todo header -->
-                    <div class="h-10 flex justify-between items-center bg-neutral-800 px-4 rounded-lg">
-                        <p class="font-extrabold">Todo</p>
-                        <button type="button" class="appearance-none outline-none rounded-lg hover:text-indigo-400 transition" title="Add new todo" x-data="{id:'todo-editor-modal'}" x-on:click="$dispatch('open-modal-overlay',{id}); $dispatch('autofocus-name', {id})">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 stroke-2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                            </svg>
-                        </button>
-                    </div>
-                    <!-- Tasks -->
-                </div>
-
-                <!-- Ongoing -->
-                <div id="ongoing" class="column flex flex-col space-y-4">
-                    <div class="h-10 flex justify-between items-center bg-yellow-800/20 px-4 rounded-lg">
-                        <p class="font-bold">Ongoing</p>
-                    </div>
-                    <!-- Tasks -->
-                </div>
-
-                <!-- Done -->
-                <div id="done" class="column flex flex-col space-y-4">
-                    <div class="h-10 flex justify-between items-center bg-green-800/20 px-4 rounded-lg">
-                        <p class="font-bold">Done</p>
-                    </div>
-                    <!-- Tasks -->
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Add Todo modal overlay -->
-    <div id="modal-overlay" class="hidden md:fixed md:inset-0 md:overflow-y-auto md:z-10 bg-neutral-800/40 md:backdrop-blur-sm md:flex md:flex-col md:px-2 md:py-8" x-data="{modal:false}" x-show="modal" x-on:open-modal-overlay.window="if ($event.detail.id == 'todo-editor-modal') modal=true" x-on:close-modal-overlay.window="if ($event.detail.id == 'todo-editor-modal') modal=false" x-transition:enter="transition ease-in" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-out" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-on:keyup.escape.window="closeTodoModal()" x-cloak>
-        <!-- Modal content -->
-        <div id="modal-content" class="w-full md:max-w-md mx-auto bg-neutral-900 rounded-2xl shadow-xl p-8 flex flex-col space-y-4" x-show="modal" x-transition:enter="transition ease-in" x-transition:enter-start="opacity-0 translate-y-3" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-out" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-3">
-            <!-- Modal header -->
-            <div class="flex justify-between items-center">
-                <p class="text-lg font-semibold">Add Todo</p>
-                <button type="button" x-on:click="closeTodoModal()" class="text-neutral-600 hover:text-neutral-100 transition outline-none appearance-none ring-neutral-700 rounded-lg focus:ring-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 stroke-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>                      
-                </button>
-            </div>
-            <!-- Editor todo container  -->
-            <div id="editor-todo" class="flex flex-col space-y-4">
-                <!-- Inputs -->
-                <div class="flex flex-col items-start space-y-2">
-                    <label for="todo-name-input" class="text-sm font-medium">Name</label>
-                    <input x-show="modal" x-on:autofocus-name.window="if ($event.detail.id == 'todo-editor-modal') $nextTick(() => { $el.focus() })" type="text" id="todo-name-input" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4"/>
-                </div>
-                <div class="flex flex-col items-start">
-                    <div id="todo-description-input" contenteditable="true" class="appearance-none outline-none w-full rounded-lg bg-neutral-800 px-3 py-2 ring-indigo-400 transition hover:ring-4 focus:ring-4 active:ring-4 min-h-40"></div>
-                </div>
-                <!-- Button -->
-                <div class="flex items-center space-x-2">
-                    <button id="todo-editor-save-button" x-on:click="saveTodoTask()" type="button" class="appearance-none outline-none w-full text-sm font-semibold bg-indigo-500 text-neutral-100 transition text-center rounded-lg py-2 px-3 ring-indigo-400 hover:ring-4 focus:ring-4 active:ring-4">Add</button>
-                    <button id="todo-editor-save-button" x-on:click="resetTodoTask(), closeTodoModal()" type="button" class="appearance-none outline-none w-full text-sm font-semibold bg-neutral-800 text-neutral-100 transition text-center rounded-lg py-2 px-3 ring-neutral-700 hover:ring-4 focus:ring-4 active:ring-4">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <footer class="flex justify-center py-2">
+        <p class="text-sm md:text-base">Made by HaqimZuhari</p>
+    </footer>
     
-    <script src="./scripts.js"></script>
+    <script src="database.js"></script>
+    <script src="model.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
