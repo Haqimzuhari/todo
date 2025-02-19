@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <title>todo &mdash; Manage your daily task</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,29 +31,27 @@
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-neutral-800 text-neutral-50">
     <div id="app" class="px-4">
-        <nav class="fixed top-0 right-0 left-0 h-16 bg-neutral-800 border-b border-neutral-700 px-4">
-            <div class="w-full h-full max-w-screen-2xl mx-auto flex items-center justify-between">
-                <div>
-                    <a href="" class="text-base md:text-xl font-bold">todo <span class="font-light text-base hidden md:inline-block"> &mdash; manage your daily task</span></a>
-                </div>
-                <div>
-                    <button type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm" x-data="{id:'modal-add-group'}" x-on:click="$dispatch('modal-overlay',{id})">Create</button>
-                    <div class="fixed inset-0 z-10 p-10 bg-black/50" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'modal-add-group') modal=true">
-                        <div class="w-full mx-auto md:max-w-screen-md bg-neutral-800 p-10 rounded-xl" x-show="modal" x-on:click.away="modal=false">
-                            <form @submit.prevent="addGroup" class="flex flex-col space-y-3">
-                                <input v-model="newGroupName" type="text" placeholder="Group name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                                <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Create Group</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+        <top-nav>
+            <div>
+                <modal-trigger modal-id="create-group" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Create</modal-trigger>
+                <modal-overlay modal-id="create-group" title="Create group">
+                    <form @submit.prevent="addGroup" class="flex flex-col space-y-3">
+                        <input v-model="newGroupName" type="text" placeholder="Group name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                        <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Create Group</button>
+                    </form>
+                </modal-overlay>
             </div>
-        </nav>    
-        <main class="w-full max-w-screen-2xl mx-auto pt-20 pb-10">
+        </top-nav>
+        <main class="w-full md:w-3/4 xl:w-2/4 mx-auto pt-20 pb-10">
             <div v-if="groups.length === 0" class="flex flex-col justify-center items-center space-y-12 py-10">
                 <img src="assets/no-data.svg" alt="No Data Available" class="mx-auto w-56 md:w-80">
                 <p class="text-neutral-500 text-sm md:text-base">No data available. Start to create one</p>
@@ -62,15 +61,13 @@
                     <div class="flex items-center justify-between">
                         <p class="text-lg font-bold underline decoration-2 underline-offset-4">{{ group.name }}</p>
                         <div>
-                            <button type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm" x-data="{id:'modal-add-item'}" x-on:click="$dispatch('modal-overlay',{id})">Add Item</button>
-                            <div class="fixed inset-0 z-10 p-10 bg-black/50" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'modal-add-item') modal=true">
-                                <div class="w-full mx-auto md:max-w-screen-md bg-neutral-800 p-10 rounded-xl" x-show="modal" x-on:click.away="modal=false">
-                                    <form @submit.prevent="addItem(group.id)" class="flex flex-col space-y-3">
-                                        <input v-model="newItemName[group.id]" type="text" placeholder="Item name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                                        <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add item</button>
-                                    </form>
-                                </div>
-                            </div>
+                            <modal-trigger :modal-id="'add-item-'+group.id" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Add Item</modal-trigger>
+                            <modal-overlay :modal-id="'add-item-'+group.id" title="Add item">
+                                <form @submit.prevent="addItem(group.id)" class="flex flex-col space-y-3">
+                                    <input v-model="newItemName[group.id]" type="text" placeholder="Item name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                                    <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add item</button>
+                                </form>
+                            </modal-overlay>
                         </div>
                     </div>
                     <div v-if="items.length === 0">
@@ -82,15 +79,15 @@
                                 <p class="text-base font-semibold">{{ item.name }}</p>
                                 <div class="flex items-center justify-between">
                                     <p class="text-sm font-light text-neutral-500">{{ formatDate(item.created_at) }}</p>
-                                    <div>
-                                        <button type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm" x-data="{id:'modal-add-task-{{ item.name }}'}" x-on:click="$dispatch('modal-overlay',{id})">Add Task</button>
-                                        <div class="fixed inset-0 z-10 p-10 bg-black/50" x-data="{modal:false}" x-show="modal" x-on:modal-overlay.window="if ($event.detail.id == 'modal-add-task-{{ item.name }}') modal=true">
-                                            <div class="w-full mx-auto md:max-w-screen-md bg-neutral-800 p-10 rounded-xl" x-show="modal" x-on:click.away="modal=false">
+                                    <div class="flex items-center space-x-2">
+                                        <div>
+                                            <modal-trigger :modal-id="'add-task-'+item.id" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Add Task</modal-trigger>
+                                            <modal-overlay :modal-id="'add-task-'+item.id" title="Add task">
                                                 <form @submit.prevent="addTask(item.id)" class="flex flex-col space-y-3">
                                                     <input v-model="newTaskName[item.id]" type="text" placeholder="Task name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
                                                     <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add task</button>
                                                 </form>
-                                            </div>
+                                            </modal-overlay>
                                         </div>
                                         <button v-on:click="deleteItem(item.id, group.id)" type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Delete Item</button>
                                     </div>
@@ -100,51 +97,18 @@
                                 <p class="text-neutral-500 text-sm md:text-base">Task is empty</p>
                             </div>
                             <div v-else class="space-y-2">
-                                <div v-for="task in tasks.filter(i => i.itemId === item.id)" :key="task.id" class="p-4 space-y-4 bg-neutral-750 rounded-lg">
-                                    <div class="flex items-center justify-between">
-                                        <div class="bg-green-800 rounded-full px-1 text-sm">{{ task.status }}</div>
-                                        <div class="flex-none flex space-x-2 items-center">
-                                            <form @submit.prevent="addComment(task.id)" class="inline-flex">
-                                                <input v-model="newCommentText[task.id]" type="text" placeholder="Comment" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                                                <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add comment</button>
-                                            </form>
-                                            <button type="button" class="bg-neutral-800 p-1 rounded-md">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path fill-rule="evenodd" d="M10 3c-4.31 0-8 3.033-8 7 0 2.024.978 3.825 2.499 5.085a3.478 3.478 0 0 1-.522 1.756.75.75 0 0 0 .584 1.143 5.976 5.976 0 0 0 3.936-1.108c.487.082.99.124 1.503.124 4.31 0 8-3.033 8-7s-3.69-7-8-7Zm0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm-2-1a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm5 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="bg-neutral-800 p-1 rounded-md">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                            <button type="button" class="bg-neutral-800 p-1 rounded-md">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path fill-rule="evenodd" d="M7.793 2.232a.75.75 0 0 1-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 0 1 0 10.75H10.75a.75.75 0 0 1 0-1.5h2.875a3.875 3.875 0 0 0 0-7.75H3.622l4.146 3.957a.75.75 0 0 1-1.036 1.085l-5.5-5.25a.75.75 0 0 1 0-1.085l5.5-5.25a.75.75 0 0 1 1.06.025Z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                            <button v-on:click="deleteTask(task.id)" type="button" class="bg-neutral-800 p-1 rounded-md">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div v-for="task in tasks.filter(i => i.itemId === item.id)" :key="task.id" class="p-4 space-y-5 bg-neutral-750 rounded-lg">
                                     <div>
-                                        <p class="font-medium" :class="{'line-through': task.status === 'done'}">{{ task.name }}</p>
-                                    </div>
-                                    <div class="space-y-1">
-                                        <div v-for="comment in comments.filter(c => c.taskId === task.id)" :key="comment.id" class="flex flex-col md:flex-row items-start md:items-center md:space-x-2">
-                                            <p class="text-sm font-extralight">{{ comment.text }}</p>
-                                            <div class="flex items-center space-x-2">
-                                                <p class="text-sm font-extralight text-neutral-500">{{ formatDate(comment.created_at) }}</p>
-                                                <button v-on:click="deleteComment(comment.id)" type="button" class="bg-neutral-800 p-1 rounded-md">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
-                                                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                                                    </svg>                                              
-                                                </button>
-                                            </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="bg-green-800 rounded-full px-1 text-sm">{{ task.status }}</div>
+                                            <task-action :task-id="task.id"></task-action>
                                         </div>
+                                        <div>
+                                            <p class="font-medium" :class="{'line-through': task.status === 'done'}">{{ task.name }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <comment v-for="comment in comments.filter(c => c.taskId === task.id)" :key="comment.id" :comment-id="comment.id" :comment="comment.text" :date="comment.created_at"></comment>
                                     </div>
                                 </div>
                             </div>
@@ -159,8 +123,16 @@
         <p class="text-sm md:text-base">Made by HaqimZuhari</p>
     </footer>
     
+    
+    <script src="components/topnav.js"></script>
+    <script src="components/modal/trigger.js"></script>
+    <script src="components/modal/overlay.js"></script>
+    <script src="components/task/action.js"></script>
+    <script src="components/comment.js"></script>
+
+
     <script src="database.js"></script>
     <script src="model.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js" type="module"></script>
 </body>
 </html>
