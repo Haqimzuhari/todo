@@ -14,6 +14,8 @@ const app = Vue.createApp({
 	},
 	components: {
 		'top-nav': topNav,
+		'x-button': buttonIndexComponent,
+		'x-input': formInputComponent,
 		'modal-trigger': modalTriggerComponent,
 		'modal-overlay': modalOverlayComponent,
 		'item': itemComponent,
