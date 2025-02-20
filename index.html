@@ -42,11 +42,11 @@
     <div id="app" class="px-4">
         <top-nav>
             <div>
-                <modal-trigger modal-id="create-group" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Create</modal-trigger>
-                <modal-overlay modal-id="create-group" title="Create group">
+                <modal-trigger modal-id="create-group" style-key="style1">Create</modal-trigger>
+                <modal-overlay modal-id="create-group" title="Group">
                     <form @submit.prevent="addGroup" class="flex flex-col space-y-3">
-                        <input v-model="newGroupName" type="text" placeholder="Group name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                        <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Create Group</button>
+                        <x-input v-model="newGroupName" placeholder="Group name"></x-input>
+                        <x-button>Create</x-button>
                     </form>
                 </modal-overlay>
             </div>
@@ -61,11 +61,11 @@
                     <div class="flex items-center justify-between">
                         <p class="text-lg font-bold underline decoration-2 underline-offset-4">{{ group.name }}</p>
                         <div>
-                            <modal-trigger :modal-id="'add-item-'+group.id" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Add Item</modal-trigger>
-                            <modal-overlay :modal-id="'add-item-'+group.id" title="Add item">
+                            <modal-trigger :modal-id="'add-item-'+group.id" style-key="style1">Add Item</modal-trigger>
+                            <modal-overlay :modal-id="'add-item-'+group.id" title="Item">
                                 <form @submit.prevent="addItem(group.id)" class="flex flex-col space-y-3">
-                                    <input v-model="newItemName[group.id]" type="text" placeholder="Item name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                                    <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add item</button>
+                                    <x-input v-model="newItemName[group.id]" placeholder="Item name"></x-input>
+                                    <x-button>Add</x-button>
                                 </form>
                             </modal-overlay>
                         </div>
@@ -76,11 +76,11 @@
                     <div v-else class="space-y-6">
                         <item v-for="item in items.filter(i => i.groupId === group.id)" :key="item.id" :group="group" :item="item">
                             <template #task-modal>
-                                <modal-trigger :modal-id="'add-task-'+item.id" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Add Task</modal-trigger>
-                                <modal-overlay :modal-id="'add-task-'+item.id" title="Add task">
+                                <modal-trigger :modal-id="'add-task-'+item.id" style-key="style1">Add Task</modal-trigger>
+                                <modal-overlay :modal-id="'add-task-'+item.id" title="Task">
                                     <form @submit.prevent="addTask(item.id)" class="flex flex-col space-y-3">
-                                        <input v-model="newTaskName[item.id]" type="text" placeholder="Task name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                                        <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add task</button>
+                                        <x-input v-model="newTaskName[item.id]" placeholder="Task name"></x-input>
+                                        <x-button>Add</x-button>
                                     </form>
                                 </modal-overlay>
                             </template>
@@ -107,6 +107,8 @@
     
     
     <script src="components/topnav.js"></script>
+    <script src="components/button/index.js"></script>
+    <script src="components/form/input.js"></script>
     <script src="components/modal/trigger.js"></script>
     <script src="components/modal/overlay.js"></script>
     <script src="components/item.js"></script>
