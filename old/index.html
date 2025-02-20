@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <title>todo &mdash; Manage your daily task</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['"Space Grotesk"'],
+                    },
+                    colors: {
+                        'neutral-750':  '#2b2b2b'
+                    },
+                    borderRadius: {
+                        'semimedium': '0.295rem'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.10.4/dayjs.min.js"></script>
+
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-neutral-800 text-neutral-50">
+    <div id="app" class="px-4">
+        <top-nav>
+            <div>
+                <modal-trigger modal-id="create-group" style-key="style1">Create</modal-trigger>
+                <modal-overlay modal-id="create-group" title="Group">
+                    <form @submit.prevent="addGroup" class="flex flex-col space-y-3">
+                        <x-input v-model="newGroupName" placeholder="Group name"></x-input>
+                        <x-button>Create</x-button>
+                    </form>
+                </modal-overlay>
+            </div>
+        </top-nav>
+        <main class="w-full md:w-3/4 xl:w-2/4 mx-auto pt-20 pb-10">
+            <div v-if="groups.length === 0" class="flex flex-col justify-center items-center space-y-12 py-10">
+                <img src="assets/no-data.svg" alt="No Data Available" class="mx-auto w-56 md:w-80">
+                <p class="text-neutral-500 text-sm md:text-base">No data available. Start to create one</p>
+            </div>
+            <div v-else class="space-y-8">
+                <div v-for="group in groups" :key="group.id" class="w-full p-4 rounded-xl space-y-4 border border-neutral-700">
+                    <div class="flex items-center justify-between">
+                        <p class="text-lg font-bold underline decoration-2 underline-offset-4">{{ group.name }}</p>
+                        <div>
+                            <modal-trigger :modal-id="'add-item-'+group.id" style-key="style1">Add Item</modal-trigger>
+                            <modal-overlay :modal-id="'add-item-'+group.id" title="Item">
+                                <form @submit.prevent="addItem(group.id)" class="flex flex-col space-y-3">
+                                    <x-input v-model="newItemName[group.id]" placeholder="Item name"></x-input>
+                                    <x-button>Add</x-button>
+                                </form>
+                            </modal-overlay>
+                        </div>
+                    </div>
+                    <div v-if="items.length === 0">
+                        <p class="text-neutral-500 text-sm md:text-base">No item. Create one</p>
+                    </div>
+                    <div v-else class="space-y-6">
+                        <item v-for="item in items.filter(i => i.groupId === group.id)" :key="item.id" :group="group" :item="item">
+                            <template #task-modal>
+                                <modal-trigger :modal-id="'add-task-'+item.id" style-key="style1">Add Task</modal-trigger>
+                                <modal-overlay :modal-id="'add-task-'+item.id" title="Task">
+                                    <form @submit.prevent="addTask(item.id)" class="flex flex-col space-y-3">
+                                        <x-input v-model="newTaskName[item.id]" placeholder="Task name"></x-input>
+                                        <x-button>Add</x-button>
+                                    </form>
+                                </modal-overlay>
+                            </template>
+                            <div v-if="tasks.length === 0">
+                                <p class="text-neutral-500 text-sm md:text-base">Task is empty</p>
+                            </div>
+                            <div v-else class="space-y-2">
+                                <task-list v-for="task in tasks.filter(i => i.itemId === item.id)" :key="task.id" :task="task">
+                                    <div class="space-y-2">
+                                        <comment v-for="comment in comments.filter(c => c.taskId === task.id)" :key="comment.id" :comment="comment"></comment>
+                                    </div>
+                                </task-list>
+                            </div>
+                        </item>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="flex justify-center py-2">
+        <p class="text-sm md:text-base">Made by HaqimZuhari</p>
+    </footer>
+    
+    
+    <script src="components/topnav.js"></script>
+    <script src="components/button/index.js"></script>
+    <script src="components/form/input.js"></script>
+    <script src="components/modal/trigger.js"></script>
+    <script src="components/modal/overlay.js"></script>
+    <script src="components/item.js"></script>
+    <script src="components/task/action.js"></script>
+    <script src="components/task/list.js"></script>
+    <script src="components/comment.js"></script>
+
+
+    <script src="database.js"></script>
+    <script src="model.js"></script>
+    <script src="app.js" type="module"></script>
+</body>
+</html>
