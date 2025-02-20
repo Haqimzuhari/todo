@@ -74,45 +74,27 @@
                         <p class="text-neutral-500 text-sm md:text-base">No item. Create one</p>
                     </div>
                     <div v-else class="space-y-6">
-                        <div v-for="item in items.filter(i => i.groupId === group.id)" :key="item.id" class="space-y-2">
-                            <div class="space-y-1">
-                                <p class="text-base font-semibold">{{ item.name }}</p>
-                                <div class="flex items-center justify-between">
-                                    <p class="text-sm font-light text-neutral-500">{{ formatDate(item.created_at) }}</p>
-                                    <div class="flex items-center space-x-2">
-                                        <div>
-                                            <modal-trigger :modal-id="'add-task-'+item.id" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Add Task</modal-trigger>
-                                            <modal-overlay :modal-id="'add-task-'+item.id" title="Add task">
-                                                <form @submit.prevent="addTask(item.id)" class="flex flex-col space-y-3">
-                                                    <input v-model="newTaskName[item.id]" type="text" placeholder="Task name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
-                                                    <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add task</button>
-                                                </form>
-                                            </modal-overlay>
-                                        </div>
-                                        <button v-on:click="deleteItem(item.id, group.id)" type="button" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Delete Item</button>
-                                    </div>
-                                </div>
-                            </div>
+                        <item v-for="item in items.filter(i => i.groupId === group.id)" :key="item.id" :group="group" :item="item">
+                            <template #task-modal>
+                                <modal-trigger :modal-id="'add-task-'+item.id" class="bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold text-sm">Add Task</modal-trigger>
+                                <modal-overlay :modal-id="'add-task-'+item.id" title="Add task">
+                                    <form @submit.prevent="addTask(item.id)" class="flex flex-col space-y-3">
+                                        <input v-model="newTaskName[item.id]" type="text" placeholder="Task name" class="appearance-none outline-none px-3 py-1 rounded-semimedium text-neutral-900"/>
+                                        <button type="submit" class="appearance-none outline-none bg-indigo-600 px-3 py-1 rounded-semimedium font-semibold">Add task</button>
+                                    </form>
+                                </modal-overlay>
+                            </template>
                             <div v-if="tasks.length === 0">
                                 <p class="text-neutral-500 text-sm md:text-base">Task is empty</p>
                             </div>
                             <div v-else class="space-y-2">
-                                <div v-for="task in tasks.filter(i => i.itemId === item.id)" :key="task.id" class="p-4 space-y-5 bg-neutral-750 rounded-lg">
-                                    <div>
-                                        <div class="flex items-center justify-between">
-                                            <div class="bg-green-800 rounded-full px-1 text-sm">{{ task.status }}</div>
-                                            <task-action :task-id="task.id"></task-action>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium" :class="{'line-through': task.status === 'done'}">{{ task.name }}</p>
-                                        </div>
+                                <task-list v-for="task in tasks.filter(i => i.itemId === item.id)" :key="task.id" :task="task">
+                                    <div class="space-y-2">
+                                        <comment v-for="comment in comments.filter(c => c.taskId === task.id)" :key="comment.id" :comment="comment"></comment>
                                     </div>
-                                    <div class="space-y-3">
-                                        <comment v-for="comment in comments.filter(c => c.taskId === task.id)" :key="comment.id" :comment-id="comment.id" :comment="comment.text" :date="comment.created_at"></comment>
-                                    </div>
-                                </div>
+                                </task-list>
                             </div>
-                        </div>
+                        </item>
                     </div>
                 </div>
             </div>
@@ -127,7 +109,9 @@
     <script src="components/topnav.js"></script>
     <script src="components/modal/trigger.js"></script>
     <script src="components/modal/overlay.js"></script>
+    <script src="components/item.js"></script>
     <script src="components/task/action.js"></script>
+    <script src="components/task/list.js"></script>
     <script src="components/comment.js"></script>
 
 

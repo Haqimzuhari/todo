@@ -16,7 +16,9 @@ const app = Vue.createApp({
 		'top-nav': topNav,
 		'modal-trigger': modalTriggerComponent,
 		'modal-overlay': modalOverlayComponent,
+		'item': itemComponent,
 		'task-action': taskActionComponent,
+		'task-list': taskListComponent,
 		'comment': commentComponent,
 	},
 	async mounted() {
